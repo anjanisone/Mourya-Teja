@@ -4,11 +4,10 @@
   "States": {
     "Lambda Invoke": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Resource": "arn:aws:states:::lambda:invoke",
       "OutputPath": "$.Payload",
       "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:604937966884:function:aravindred-textract-task:$LATEST"
+        "Payload.$": "$"
       },
       "Retry": [
         {
@@ -26,11 +25,10 @@
     },
     "Lambda Invoke (1)": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Resource": "arn:aws:states:::lambda:invoke",
       "OutputPath": "$.Payload",
       "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "arn:aws:lambda:us-east-1:604937966884:function:test4prasad:$LATEST"
+        "Payload.$": "$"
       },
       "Retry": [
         {
@@ -52,22 +50,41 @@
       "Parameters": {
         "JobName": "myJobName"
       },
+      "Catch": [
+        {
+          "ErrorEquals": [],
+          "Next": "SNS Publish"
+        }
+      ],
       "Next": "Glue StartJobRun (1)"
     },
     "Glue StartJobRun (1)": {
       "Type": "Task",
       "Resource": "arn:aws:states:::glue:startJobRun",
       "Parameters": {
-        "JobName": "myJobName1"
+        "JobName": "myJobName"
       },
-      "Next": "SNS Publish"
+      "End": true,
+      "Catch": [
+        {
+          "ErrorEquals": [],
+          "Next": "SNS Publish (1)"
+        }
+      ]
+    },
+    "SNS Publish (1)": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "Message.$": "$"
+      },
+      "End": true
     },
     "SNS Publish": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "Message.$": "$",
-        "TopicArn": ""
+        "Message.$": "$"
       },
       "End": true
     }
